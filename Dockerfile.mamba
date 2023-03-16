@@ -14,6 +14,7 @@ RUN apt-get update && \
     apt-get -qq install -y --no-install-recommends \
         locales \
         ca-certificates \
+        curl \
         wget \
         man \
         git \

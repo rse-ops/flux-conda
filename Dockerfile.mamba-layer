@@ -9,9 +9,13 @@ FROM ubuntu:${tag}
 ENV PATH=/opt/conda/bin:$PATH LANG=C.UTF-8
 ENV DEBIAN_FRONTEND=noninteractive
 
+# Manually create the fluxuser
+RUN groupadd -r fluxuser && \
+    useradd -r -g fluxuser -u 1000 -d /home/fluxuser -m fluxuser && \
+    printf "fluxuser ALL= NOPASSWD: ALL\\n" >> /etc/sudoers && \
 # This first section from src/test/docker/bionic/Dockerfile in flux-core
 # https://github.com/flux-framework/flux-core/blob/master/src/test/docker/bionic/Dockerfile
-RUN apt-get update && \
+    apt-get update && \
     apt-get -qq install -y --no-install-recommends \
         apt-utils && \
     apt-get -qq install -y --no-install-recommends \
@@ -117,9 +121,6 @@ RUN apt-get update && \
     PYTHON=/opt/conda/bin/python ./configure --prefix=/usr && make -j 4 install && \
     cd ../.. && \
     rm -rf prrte && \
-    # Manually create the fluxuser
-    useradd -u 1000 -d /home/fluxuser -m fluxuser && \
-    printf "fluxuser ALL= NOPASSWD: ALL\\n" >> /etc/sudoers && \
     export FLUX_SECURITY_VERSION=0.8.0 && \
     cd /opt && \
     CCACHE_DISABLE=1 && \

@@ -22,6 +22,11 @@ jobs:
     # This is the container URI without a tag
     env:
       container: ghcr.io/rse-ops/flux-conda
+
+    strategy:
+      matrix:
+        dockerfile: [[Dockerfile, "latest"], [Dockerfile.mamba, "mamba"]]
+
     runs-on: ubuntu-latest
     name: Build
     steps:
@@ -29,7 +34,10 @@ jobs:
       uses: actions/checkout@v3
 
     - name: Build Regular Container
-      run: docker build -t ${{ env.container }}:latest .
+      env:
+        dockerfile: ${{ matrix.dockerfile[0] }}
+        tag: ${{ matrix.dockerfile[1] }}
+      run: docker build -f ${dockerfile} -t ${{ env.container }}:${tag} .
 
     - name: GHCR Login
       if: (github.event_name != 'pull_request')
@@ -41,12 +49,22 @@ jobs:
 
     - name: Tag and Push Release Image
       if: (github.event_name == 'release')
-      run: |
+      env:
+        docker_tag: ${{ matrix.dockerfile[1] }}
+      run: |        
         tag=${GITHUB_REF#refs/tags/}
-        echo "Tagging and releasing ${{ env.container }}:${tag}"
-        docker tag ${{ env.container }}:latest ${{ env.container }}:${tag}
-        docker push ${{ env.container }}:${tag}
+        if [[ "${docker_tag}" != "latest" ]]; then
+          echo "Tagging and releasing ${{ env.container }}:${docker_tag}-${tag}"
+          docker tag ${{ env.container }}:${tag} ${{ env.container }}:${docker_tag}-${tag}
+          docker push ${{ env.container }}:${docker_tag}-${tag}
+        else
+          echo "Tagging and releasing ${{ env.container }}:${tag}"
+          docker tag ${{ env.container }}:latest ${{ env.container }}:${tag}
+          docker push ${{ env.container }}:${tag}
+        fi
 
     - name: Deploy
       if: (github.event_name != 'pull_request')
-      run: docker push ${{ env.container }}:latest
+      env:
+        tag: ${{ matrix.dockerfile[1] }}
+      run: docker push ${{ env.container }}:${tag}

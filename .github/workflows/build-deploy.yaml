@@ -25,7 +25,10 @@ jobs:
 
     strategy:
       matrix:
-        dockerfile: [[Dockerfile, "latest"], [Dockerfile.mamba, "mamba"]]
+        dockerfile: [[Dockerfile, "latest", ""], 
+                     [Dockerfile.mamba, "mamba", ""],
+                     [Dockerfile.mamba-layer, "mamba-layer", "--build-arg tag=focal"],
+                     [Dockerfile.mamba-layer, "mamba-layer", "--build-arg tag=bionic"]]
 
     runs-on: ubuntu-latest
     name: Build
@@ -36,8 +39,9 @@ jobs:
     - name: Build Regular Container
       env:
         dockerfile: ${{ matrix.dockerfile[0] }}
+        flags: ${{ matrix.dockerfile[2] }}
         tag: ${{ matrix.dockerfile[1] }}
-      run: docker build -f ${dockerfile} -t ${{ env.container }}:${tag} .
+      run: docker build -f ${dockerfile} ${flags} -t ${{ env.container }}:${tag} .
 
     - name: GHCR Login
       if: (github.event_name != 'pull_request')

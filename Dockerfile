@@ -120,13 +120,13 @@ RUN git clone https://github.com/openpmix/openpmix.git && \
     cd openpmix && \
     git checkout fefaed568f33bf86f28afb6e45237f1ec5e4de93 && \
     ./autogen.pl && \
-    ./configure --prefix=/usr --disable-static && make -j 4 install && \
+    PYTHON=/opt/miniconda/bin/python ./configure --prefix=/usr --disable-static && make -j 4 install && \
     ldconfig && \
     cd .. && \
     cd prrte && \
     git checkout 477894f4720d822b15cab56eee7665107832921c && \
     ./autogen.pl && \
-    ./configure --prefix=/usr && make -j 4 install && \
+    PYTHON=/opt/miniconda/bin/python ./configure --prefix=/usr && make -j 4 install && \
     cd ../.. && \
     rm -rf prrte
 
@@ -149,7 +149,7 @@ RUN CCACHE_DISABLE=1 && \
     wget ${URL}/v${V}/${PKG}.tar.gz && \
     tar xvfz ${PKG}.tar.gz && \
     cd ${PKG} && \
-    ./configure --prefix=/usr --sysconfdir=/etc || cat config.log && \
+    PYTHON=/opt/miniconda/bin/python ./configure --prefix=/usr --sysconfdir=/etc || cat config.log && \
     make -j 4 && \
     make install && \
     cd .. && \
@@ -174,7 +174,7 @@ RUN mkdir -p /var/run/munge && \
 RUN git clone --depth 1 -b disable-sign-id-check https://github.com/researchapps/flux-core && \
     cd flux-core && \
     ./autogen.sh && \
-    PYTHON=/opt/miniconda/bin/python ./configure --prefix=/usr --sysconfdir=/etc \
+    PYTHON=/opt/miniconda/bin/python PYTHON_PREFIX=PYTHON_EXEC_PREFIX=/opt/miniconda/lib/python3.8/site-packages ./configure --prefix=/usr --sysconfdir=/etc \
         --with-systemdsystemunitdir=/etc/systemd/system \
         --localstatedir=/var \
         --with-flux-security \
@@ -194,17 +194,20 @@ RUN sudo apt-get -qq install -y --no-install-recommends \
 	libyaml-cpp-dev \
 	libedit-dev
 
+ENV LD_LIBRARY_PATH=/opt/miniconda/lib:$LD_LIBRARY_PATH
+
 # Build Flux Sched	
 # https://github.com/flux-framework/flux-sched/blob/master/src/test/docker/docker-run-checks.sh#L152-L158
 RUN git clone --depth 1 https://github.com/flux-framework/flux-sched && \
     cd flux-sched && \
     ./autogen.sh && \
-    ./configure --prefix=/usr --sysconfdir=/etc \
+    PYTHON=/opt/miniconda/bin/python ./configure --prefix=/usr --sysconfdir=/etc \
        --with-systemdsystemunitdir=/etc/systemd/system \
        --localstatedir=/var \
        --with-flux-security \
        --enable-caliper && \
     make && \
-    sudo make install
+    sudo make install && \
+    ldconfig
 
 WORKDIR /opt/flux-core

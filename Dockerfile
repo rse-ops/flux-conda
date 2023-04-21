@@ -210,4 +210,6 @@ RUN git clone --depth 1 https://github.com/flux-framework/flux-sched && \
     sudo make install && \
     ldconfig
 
+# Ensure the flux tree command is "installed"
+RUN cp /opt/flux-sched/t/scripts/flux-tree* /usr/libexec/flux/cmd/
 WORKDIR /opt/flux-core

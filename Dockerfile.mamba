@@ -1,5 +1,4 @@
 FROM ubuntu:bionic
-
 # docker build -t rse-ops/flux-conda:latest .
 
 # This first section from src/test/docker/bionic/Dockerfile in flux-core

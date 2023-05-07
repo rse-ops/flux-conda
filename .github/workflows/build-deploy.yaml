@@ -27,6 +27,7 @@ jobs:
       matrix:
         dockerfile: [[Dockerfile, "latest", ""], 
                      [Dockerfile.mamba, "mamba", ""],
+                     [Dockerfile.mamba-env, "env", ""],
                      [Dockerfile.mamba-layer, "mamba-layer-focal", "--build-arg tag=focal"],
                      [Dockerfile.mamba-layer, "mamba-layer-bionic", "--build-arg tag=bionic"]]
 

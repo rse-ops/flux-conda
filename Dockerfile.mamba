@@ -140,19 +140,14 @@ ARG FLUX_SECURITY_VERSION=0.8.0
 # Install flux-security by hand for now:
 #
 WORKDIR /opt
-RUN CCACHE_DISABLE=1 && \
-    V=$FLUX_SECURITY_VERSION && \
-    PKG=flux-security-$V && \
-    URL=https://github.com/flux-framework/flux-security/releases/download && \
-    wget ${URL}/v${V}/${PKG}.tar.gz && \
-    tar xvfz ${PKG}.tar.gz && \
-    cd ${PKG} && \
-    PYTHON=/opt/conda/bin/python ./configure --prefix=/usr --sysconfdir=/etc || cat config.log && \
-    make -j 4 && \
+RUN git clone --depth 1 https://github.com/flux-framework/flux-security && \
+    cd flux-security && \
+    ./autogen.sh && \
+    PYTHON=/opt/conda/bin/python ./configure --prefix=/usr --sysconfdir=/etc && \
+    make&& \
     make install && \
     cd .. && \
-    rm -rf flux-security-*
-
+    rm -rf flux-security
 
 # Add configured user to image with sudo access:
 #
@@ -170,7 +165,9 @@ RUN mkdir -p /var/run/munge && \
 RUN git clone https://github.com/flux-framework/flux-core && \
     cd flux-core && \
     ./autogen.sh && \
-    PYTHON=/opt/conda/bin/python PYTHON_PREFIX=PYTHON_EXEC_PREFIX=/opt/conda/lib/python3.8/site-packages ./configure --prefix=/usr --sysconfdir=/etc \
+    PYTHON=/opt/conda/bin/python PYTHON_PREFIX=PYTHON_EXEC_PREFIX=/opt/conda/lib/python3.8/site-packages ./configure \
+        --prefix=/usr \
+        --sysconfdir=/etc \
         --with-systemdsystemunitdir=/etc/systemd/system \
         --localstatedir=/var \
         --with-flux-security \

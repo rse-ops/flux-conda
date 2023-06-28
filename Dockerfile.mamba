@@ -167,9 +167,7 @@ RUN mkdir -p /var/run/munge && \
     chmod 600 /etc/munge/munge.key
 
 # Build flux core
-# This I added and copied how to build with caliper / flux security enabled
-# https://github.com/flux-framework/flux-core/blob/master/src/test/docker/docker-run-checks.sh#L185-L191
-RUN git clone --depth 1 -b disable-sign-id-check https://github.com/researchapps/flux-core && \
+RUN git clone https://github.com/flux-framework/flux-core && \
     cd flux-core && \
     ./autogen.sh && \
     PYTHON=/opt/conda/bin/python PYTHON_PREFIX=PYTHON_EXEC_PREFIX=/opt/conda/lib/python3.8/site-packages ./configure --prefix=/usr --sysconfdir=/etc \
